@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from splinter import Browser
-from time import sleep
+from time     import sleep
+from dateutil import parser
 import argparse, json
 
 class GPlusEventManager(object):
@@ -136,12 +137,10 @@ if args.description:
     with open(args.description, 'r') as description:
         desc = description.read()
 
-if args.date:
-    datetime = args.date.split(' ')
-    date = datetime[0]
-    time = datetime[1]+datetime[2]
+def parse_date(date):
+    yield parser.parse(args.date).strftime('%Y-%m-%d %I:%M %p')
 
-print title, desc, date, time
+def 
 
 if args.action == 'create':
     id = gpem.create(args.title, desc, date, time)
@@ -154,7 +153,6 @@ elif args.action == 'details':
     print details
 
 
-    
 """Testing
 event = gpem.create('test', 'test', '2013-09-01', '10:45 PM')
 print event
@@ -162,4 +160,5 @@ gpem.update(event, title='New title')
 sleep(2)
 gpem.details(event)
 """
+
 
