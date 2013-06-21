@@ -104,9 +104,8 @@ class GPlusEventManager(object):
         details['title'] = self.br.find_by_css('div[class="Iba"]').text.split('\n')[0]
         details['desc']  = self.br.find_by_css('div[class="T7BsYe"]').text
 
-        print details
+        #print details
         return details
-
 
     def login(self):
         self.br.visit('https://plus.google.com/u/0/events')
@@ -114,13 +113,53 @@ class GPlusEventManager(object):
         self.br.fill('Passwd', self.passwd)
         self.br.find_by_name('signIn').click()
 
+# Load config
 with open('config.json', 'r') as config:
     settings = json.loads(config.read())
 
 gpem  = GPlusEventManager(settings['username'], settings['password'])
+
+# Parse arguments
+title  = desc = date = time = None
+parser = argparse.ArgumentParser()
+parser.add_argument("action",  help="create to create a new event\nupdate to update an event\ndetails to get event info")
+parser.add_argument("--title", help="event title")
+parser.add_argument("--date",  help="event date")
+parser.add_argument("--id",    help="event id")
+parser.add_argument("--description", help="txt file with description")
+args = parser.parse_args()
+
+if args.title:
+    title = args.title
+
+if args.description:
+    with open(args.description, 'r') as description:
+        desc = description.read()
+
+if args.date:
+    datetime = args.date.split(' ')
+    date = datetime[0]
+    time = datetime[1]+datetime[2]
+
+print title, desc, date, time
+
+if args.action == 'create':
+    id = gpem.create(args.title, desc, date, time)
+    print 'Created: {}'.format(id)
+elif args.action == 'update':
+    gpem.update(args.id, title, desc, date, time)
+    print 'Event {} updated'.format(args.id)
+elif args.action == 'details':
+    details = gpem.details(args.id)
+    print details
+
+
+    
+"""Testing
 event = gpem.create('test', 'test', '2013-09-01', '10:45 PM')
 print event
 gpem.update(event, title='New title')
 sleep(2)
 gpem.details(event)
+"""
 
