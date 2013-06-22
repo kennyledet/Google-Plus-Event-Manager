@@ -118,17 +118,7 @@ class GPlusEventManager(object):
 with open('config.json', 'r') as config:
     settings = json.loads(config.read())
 
-gpem  = GPlusEventManager(settings['username'], settings['password'])
-
-# Parse arguments
-title  = desc = date = time = None
-parser = argparse.ArgumentParser()
-parser.add_argument("action",  help="create to create a new event\nupdate to update an event\ndetails to get event info")
-parser.add_argument("--title", help="event title")
-parser.add_argument("--date",  help="event date")
-parser.add_argument("--id",    help="event id")
-parser.add_argument("--description", help="txt file with description")
-args = parser.parse_args()
+gpem = GPlusEventManager(settings['username'], settings['password'])
 
 if args.title:
     title = args.title
@@ -137,10 +127,30 @@ if args.description:
     with open(args.description, 'r') as description:
         desc = description.read()
 
-def parse_date(date):
-    yield parser.parse(args.date).strftime('%Y-%m-%d %I:%M %p')
+def cli_parse():
+    # Parse arguments
+    options = {'title': None, 'desc': None, 'date': None, 'time': None}
+    title  = desc = date = time = None
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action",  help="create to create a new event\nupdate to update an event\ndetails to get event info")
+    parser.add_argument("--title", help="event title")
+    parser.add_argument("--date",  help="event date")
+    parser.add_argument("--id",    help="event id")
+    parser.add_argument("--description", help="txt file with description")
+    args = parser.parse_args()
 
-def 
+    title = args.titles
+    
+
+    date = parser.parse(args.date).strftime('%Y-%m-%d %I:%M %p')
+    yield date
+
+    desc 
+
+
+
+
+
 
 if args.action == 'create':
     id = gpem.create(args.title, desc, date, time)
