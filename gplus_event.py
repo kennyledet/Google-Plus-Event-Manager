@@ -15,7 +15,7 @@ limitations under the License.
 """
 from splinter import Browser
 from time     import sleep
-from dateutil import parser
+from dateutil import parser as dtparser
 import argparse, json
 
 class GPlusEventManager(object):
@@ -139,25 +139,27 @@ def cli_parse():
             options['desc'] = description.read()
 
     if args.date:
-        options['date'] = parser.parse(args.date).strftime('%Y-%m-%d')
-        options['time'] = parser.parse(args.date).strftime('%I:%M %p')
+        options['date'] = dtparser.parse(args.date).strftime('%Y-%m-%d')
+        options['time'] = dtparser.parse(args.date).strftime('%I:%M %p')
 
     if args.id:
         options['id'] = args.id
+
+    options['action'] = args.action
 
     return options
 
 options = cli_parse()
 
-if args.action == 'create':
+if options['action'] == 'create':
     id = gpem.create(options['title'], options['desc'], options['date'], options['time'])
 
     print 'Created: {}'.format(id)
-elif args.action == 'update':
+elif options['action'] == 'update':
     gpem.update(options['id'], options['title'], options['desc'], options['date'], options['time'])
 
     print 'Event {} updated'.format(options['id'])
-elif args.action == 'details':
+elif options['action'] == 'details':
     details = gpem.details(options['id'])
 
     print details
