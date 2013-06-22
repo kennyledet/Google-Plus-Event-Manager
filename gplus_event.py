@@ -120,17 +120,9 @@ with open('config.json', 'r') as config:
 
 gpem = GPlusEventManager(settings['username'], settings['password'])
 
-if args.title:
-    title = args.title
-
-if args.description:
-    with open(args.description, 'r') as description:
-        desc = description.read()
-
 def cli_parse():
-    # Parse arguments
-    options = {'title': None, 'desc': None, 'date': None, 'time': None}
-    title  = desc = date = time = None
+    '''Parse command-line arguments'''
+    options = {'title': None, 'desc': None, 'date': None, 'time': None, 'id': None}
     parser = argparse.ArgumentParser()
     parser.add_argument("action",  help="create to create a new event\nupdate to update an event\ndetails to get event info")
     parser.add_argument("--title", help="event title")
@@ -139,36 +131,42 @@ def cli_parse():
     parser.add_argument("--description", help="txt file with description")
     args = parser.parse_args()
 
-    title = args.titles
-    
+    if args.title:
+        options['title'] = args.title
 
-    date = parser.parse(args.date).strftime('%Y-%m-%d %I:%M %p')
-    yield date
+    if args.description:
+        with open(args.description, 'r') as description:
+            options['desc'] = description.read()
 
-    desc 
+    if args.date:
+        options['date'] = parser.parse(args.date).strftime('%Y-%m-%d')
+        options['time'] = parser.parse(args.date).strftime('%I:%M %p')
 
+    if args.id:
+        options['id'] = args.id
 
+    return options
 
-
-
+options = cli_parse()
 
 if args.action == 'create':
-    id = gpem.create(args.title, desc, date, time)
+    id = gpem.create(options['title'], options['desc'], options['date'], options['time'])
+
     print 'Created: {}'.format(id)
 elif args.action == 'update':
-    gpem.update(args.id, title, desc, date, time)
-    print 'Event {} updated'.format(args.id)
+    gpem.update(options['id'], options['title'], options['desc'], options['date'], options['time'])
+
+    print 'Event {} updated'.format(options['id'])
 elif args.action == 'details':
-    details = gpem.details(args.id)
+    details = gpem.details(options['id'])
+
     print details
 
 
-"""Testing
+"""Testing without CLI args
 event = gpem.create('test', 'test', '2013-09-01', '10:45 PM')
 print event
 gpem.update(event, title='New title')
 sleep(2)
 gpem.details(event)
 """
-
-
