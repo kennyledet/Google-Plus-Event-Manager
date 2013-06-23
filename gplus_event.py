@@ -105,6 +105,8 @@ class GPlusEventManager(object):
         details['title'] = self.br.find_by_css('div[class="Iba"]').text.split('\n')[0]
         details['desc']  = self.br.find_by_css('div[class="T7BsYe"]').text
 
+        self.br.find_by_css('a[href^="./"]')
+
         #print details
         return details
 
