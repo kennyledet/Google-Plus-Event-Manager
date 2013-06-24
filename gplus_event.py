@@ -101,13 +101,14 @@ class GPlusEventManager(object):
     def details(self, id):
         """ Read details of a Google event """
         self.br.visit(id)
-        details = {}
+        details = {'guests': []}
         details['title'] = self.br.find_by_css('div[class="Iba"]').text.split('\n')[0]
         details['desc']  = self.br.find_by_css('div[class="T7BsYe"]').text
 
-        self.br.find_by_css('a[href^="./"]')
+        guests  = self.br.find_by_css('a[href^="./"]')[2:]
+        for guest in guests:
+            details['guests'].append({guest.text : guest['href']})
 
-        #print details
         return details
 
     def login(self):
