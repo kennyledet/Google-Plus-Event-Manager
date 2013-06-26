@@ -14,120 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from splinter import Browser
-from time     import sleep
+from time import sleep
 from dateutil import parser as dtparser
-import argparse, json
+import argparse
+import json
 
-class GPlusEventManager(object):
-    def __init__(self, email, passwd):
-        self.email  = email
-        self.passwd = passwd
-        self.br     = Browser('chrome')
-        # to dynamically load jQuery into the HTML head
-        self.loadjq = """var head = document.getElementsByTagName('head')[0];
-                   var script  = document.createElement('script');
-                   script.type = 'text/javascript';
-                   script.src  = '//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js';
-                   head.appendChild(script);"""
-
-        self.login()
-
-
-    def create(self, title, desc, date, time):
-        """ Create a new Google Plus event """
-        self.br.find_by_css('div[guidedhelpid="events_create_event_button"]')[0].click()
-
-        self.br.find_by_css('input[placeholder="Event title"]').fill(title)
-
-        self.br.find_by_css('input[class="g-A-G T4 lUa"]').click()
-        self.br.execute_script('document.body.getElementsByClassName("g-A-G T4 lUa")[0].value = ""')
-        self.br.find_by_css('input[class="g-A-G T4 lUa"]').type('{}\t'.format(date))
-
-        self.br.execute_script(self.loadjq)
-        loaded = False
-        while not loaded:
-            try:
-                self.br.execute_script('$(".EKa")[0].value = ""')
-            except Exception, e:
-                pass
-            else:
-                loaded = True
-
-        self.br.find_by_css('input[class="g-A-G T4 EKa"]')[0].type('{}'.format(time))
-
-        self.br.execute_script('document.body.getElementsByClassName("yd editable")[1].innerHTML = "{}"'.format(desc))
-
-        self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
-        self.br.find_by_css('input[class="i-j-h-G-G"]').type('Public\t')
-        self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
-
-        sleep(4)  # wait for double page load
-        return self.br.url  # return event url
-
-
-    def update(self, id, title=None, desc=None, date=None, time=None):
-        """ Update a Google Plus event """
-        """ TODO: Refactor most of this into create method to reduce redundancy """
-        self.br.visit(id)
-        # click dropdown to see edit event link
-        self.br.find_by_xpath('//*[@id="contentPane"]/div/div/div/div[2]/div[2]/div[2]/div[2]/div/div/div[2]/div[2]/div/div[1]').click()
-        self.br.find_by_xpath('//*[@id=":o"]/div').click()
-
-        if title:
-            self.br.find_by_css('input[placeholder="Event title"]').fill(title)
-        if date:
-            self.br.find_by_css('input[class="g-A-G T4 lUa"]').click()
-            self.br.execute_script('document.body.getElementsByClassName("g-A-G T4 lUa")[0].value = ""')
-            self.br.find_by_css('input[class="g-A-G T4 lUa"]').type('{}\t'.format(date))
-        if time:
-            self.br.execute_script(self.loadjq)
-            loaded = False
-            while not loaded:
-                try:
-                    self.br.execute_script('$(".EKa")[0].value = ""')
-                except Exception, e:
-                    pass
-                else:
-                    loaded = True
-
-            self.br.find_by_css('input[class="g-A-G T4 EKa"]')[0].type('{}'.format(time))     
-        if desc:
-            self.br.execute_script('document.body.getElementsByClassName("yd editable")[1].innerHTML = "{}"'.format(desc))
-
-
-        self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
-
-
-    def details(self, id):
-        """ Read details of a Google event """
-        self.br.visit(id)
-        details = {'guests': []}
-        details['title'] = self.br.find_by_css('div[class="Iba"]').text.split('\n')[0]
-        details['desc']  = self.br.find_by_css('div[class="T7BsYe"]').text
-
-        guests  = self.br.find_by_css('a[href^="./"]')[2:]
-        for guest in guests:
-            details['guests'].append({guest.text : guest['href']})
-
-        return details
-
-    def login(self):
-        self.br.visit('https://plus.google.com/u/0/events')
-        self.br.fill('Email', self.email)
-        self.br.fill('Passwd', self.passwd)
-        self.br.find_by_name('signIn').click()
-
-# Load config
-with open('config.json', 'r') as config:
-    settings = json.loads(config.read())
-
-gpem = GPlusEventManager(settings['username'], settings['password'])
 
 def cli_parse():
     '''Parse command-line arguments'''
-    options = {'title': None, 'desc': None, 'date': None, 'time': None, 'id': None}
+    options = {'title': None, 'desc': None, 'date': None,
+               'time': None, 'id': None}
     parser = argparse.ArgumentParser()
-    parser.add_argument("action",  help="create to create a new event\nupdate to update an event\ndetails to get event info")
+    parser.add_argument("action",  help='''use "create" to create a new event\n
+        "update" to update an event\n"details" to get event info''')
     parser.add_argument("--title", help="event title")
     parser.add_argument("--date",  help="event date")
     parser.add_argument("--id",    help="event id")
@@ -152,14 +51,130 @@ def cli_parse():
 
     return options
 
+
+class GPlusEventManager(object):
+    def __init__(self, email, passwd):
+        self.email = email
+        self.passwd = passwd
+        self.br = Browser('chrome')
+        # to dynamically load jQuery into the HTML head
+        self.loadjq = """var head = document.getElementsByTagName('head')[0];
+           var script  = document.createElement('script');
+           script.type = 'text/javascript';
+           script.src  =
+                '//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js';
+           head.appendChild(script);"""
+
+        self.logged_in = self.login()
+
+    def create(self, title, desc, date, time):
+        """ Create a new Google Plus event """
+        if not self.logged_in:
+            return None
+        create_btn = 'div[guidedhelpid="events_create_event_button"]'
+        self.br.find_by_css(create_btn)[0].click()
+        return self.complete_form(title, desc, date, time)
+
+    def update(self, id, title=None, desc=None, date=None, time=None):
+        """ Update a Google Plus event """
+        if not self.logged_in:
+            return none
+
+        self.br.visit(id)
+        dropdown = '''//*[@id="contentPane"]/div/div/div/div[2]/div[2]
+                    /div[2]/div[2]/div/div/div[2]/div[2]/div/div[1]'''
+        self.br.find_by_xpath(dropdown).click()
+        self.br.find_by_xpath('//*[@id=":o"]/div').click()
+        return self.complete_form(title, desc, date, time)
+
+    def complete_form(self, title, desc, date, time):
+        if title:
+            self.br.find_by_css('input[placeholder="Event title"]').fill(title)
+        if date:
+            self.br.find_by_css('input[class="g-A-G T4 lUa"]').click()
+            rm_date = '''document.body.getElementsByClassName("g-A-G T4 lUa")
+                         [0].value = ""'''
+            self.br.execute_script(rm_date)
+            date_field = 'input[class="g-A-G T4 lUa"]'
+            self.br.find_by_css(date_field).type('{}\t'.format(date))
+        if time:
+            self.br.execute_script(self.loadjq)
+            loaded = False
+            rm_time = '$(".EKa")[0].value = ""'
+            while not loaded:
+                try:
+                    self.br.execute_script(rm_time)
+                except Exception, e:
+                    pass
+                else:
+                    loaded = True
+
+            time_field = 'input[class="g-A-G T4 EKa"]'
+            self.br.find_by_css(time_field)[0].type('{}'.format(time))
+        if desc:
+            set_desc = '''document.body.getElementsByClassName("yd editable")
+                         [1].innerHTML = "{}"'''.format(desc)
+            self.br.execute_script(set_desc)
+
+        self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
+
+        if None not in (title, desc, date, time):  # if new entry
+            self.br.find_by_css('input[class="i-j-h-G-G"]').type('Public\t')
+            self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
+
+        sleep(4)  # wait for double page load
+        return self.br.url  # return event url
+
+    def details(self, id):
+        """ Read details of a Google event """
+        if not self.logged_in:
+            return None
+
+        self.br.visit(id)
+
+        title = 'div[class="Iba"]'
+        desc = 'div[class="T7BsYe"]'
+
+        details['title'] = self.br.find_by_css(title).text.split('\n')[0]
+        details['desc'] = self.br.find_by_css(desc).text
+
+        details = {'guests': []}
+        guests = self.br.find_by_css('a[href^="./"]')[2:]
+        for guest in guests:
+            details['guests'].append({guest.text: guest['href']})
+
+        return details
+
+    def login(self):
+        url = 'https://plus.google.com/u/0/events'
+        #self.close_other_windows(url)
+
+        self.br.visit(url)
+        self.br.fill('Email', self.email)
+        self.br.fill('Passwd', self.passwd)
+        try:
+            self.br.find_by_name('signIn').click()
+        except Exception, e:
+            return False
+        else:
+            return True
+
+# Load config
+with open('config.json', 'r') as config:
+    settings = json.loads(config.read())
+
+gpem = GPlusEventManager(settings['username'], settings['password'])
+
 options = cli_parse()
 
 if options['action'] == 'create':
-    id = gpem.create(options['title'], options['desc'], options['date'], options['time'])
+    id = gpem.create(options['title'], options['desc'],
+                     options['date'], options['time'])
 
     print 'Created: {}'.format(id)
 elif options['action'] == 'update':
-    gpem.update(options['id'], options['title'], options['desc'], options['date'], options['time'])
+    id = gpem.update(options['id'], options['title'], options['desc'],
+                     options['date'], options['time'])
 
     print 'Event {} updated'.format(options['id'])
 elif options['action'] == 'details':
