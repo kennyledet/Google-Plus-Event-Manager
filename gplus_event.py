@@ -20,6 +20,10 @@ import argparse
 import json
 
 
+def load_config():
+    with open('config.json', 'r') as config:
+    return json.loads(config.read())
+
 def cli_parse():
     '''Parse command-line arguments'''
     options = {'title': None, 'desc': None, 'date': None,
@@ -159,26 +163,22 @@ class GPlusEventManager(object):
         else:
             return True
 
-# Load config
-with open('config.json', 'r') as config:
-    settings = json.loads(config.read())
+conf = load_config()
+opts = cli_parse()
+gpem = GPlusEventManager(conf['username'], conf['password'])
 
-gpem = GPlusEventManager(settings['username'], settings['password'])
-
-options = cli_parse()
-
-if options['action'] == 'create':
-    id = gpem.create(options['title'], options['desc'],
-                     options['date'], options['time'])
+if opts['action'] == 'create':
+    id = gpem.create(opts['title'], opts['desc'],
+                     opts['date'], opts['time'])
 
     print 'Created: {}'.format(id)
-elif options['action'] == 'update':
-    id = gpem.update(options['id'], options['title'], options['desc'],
-                     options['date'], options['time'])
+elif opts['action'] == 'update':
+    id = gpem.update(opts['id'], opts['title'], opts['desc'],
+                     opts['date'], opts['time'])
 
-    print 'Event {} updated'.format(options['id'])
-elif options['action'] == 'details':
-    details = gpem.details(options['id'])
+    print 'Event {} updated'.format(opts['id'])
+elif opts['action'] == 'details':
+    details = gpem.details(opts['id'])
 
     print details
 
