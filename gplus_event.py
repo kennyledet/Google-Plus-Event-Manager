@@ -22,7 +22,8 @@ import json
 
 def load_config():
     with open('config.json', 'r') as config:
-    return json.loads(config.read())
+        return json.loads(config.read())
+
 
 def cli_parse():
     '''Parse command-line arguments'''
@@ -34,7 +35,7 @@ def cli_parse():
     parser.add_argument("--title", help="event title")
     parser.add_argument("--date",  help="event date")
     parser.add_argument("--id",    help="event id")
-    parser.add_argument("--description", help="txt file with description")
+    parser.add_argument("--description", help="stdin or path to txt file")
     args = parser.parse_args()
 
     if args.title:
@@ -126,7 +127,7 @@ class GPlusEventManager(object):
             self.br.find_by_css('input[class="i-j-h-G-G"]').type('Public\t')
             self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
 
-        sleep(4)  # wait for double page load
+        sleep(5)  # wait for double page load
         return self.br.url  # return event url
 
     def details(self, id):
@@ -151,7 +152,6 @@ class GPlusEventManager(object):
 
     def login(self):
         url = 'https://plus.google.com/u/0/events'
-        #self.close_other_windows(url)
 
         self.br.visit(url)
         self.br.fill('Email', self.email)
