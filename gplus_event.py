@@ -63,7 +63,9 @@ class GPlusEventManager(object):
     def __init__(self, email, passwd):
         self.email = email
         self.passwd = passwd
-        self.br = Browser('chrome')
+        self.u_agent = '''Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:10.0) Gecko/20100101 Firefox/10.0'''
+        self.br = Browser('phantomjs', user_agent=self.u_agent)
+
         # to dynamically load jQuery into the HTML head
         self.loadjq = """var head = document.getElementsByTagName('head')[0];
            var script  = document.createElement('script');
@@ -78,8 +80,11 @@ class GPlusEventManager(object):
         """ Create a new Google Plus event """
         if not self.logged_in:
             return None
+
         create_btn = 'div[guidedhelpid="events_create_event_button"]'
         self.br.find_by_css(create_btn)[0].click()
+        sleep(3)
+        #print self.br.url
         return self.complete_form(title, desc, date, time)
 
     def update(self, id, title=None, desc=None, date=None, time=None):
@@ -132,6 +137,7 @@ class GPlusEventManager(object):
             self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
 
         sleep(5)  # wait for double page load
+        print self.br.url
         return self.br.url  # return event url
 
     def details(self, id):
@@ -164,6 +170,7 @@ class GPlusEventManager(object):
         except Exception, e:
             return False
         else:
+            print 1
             return True
 
 conf = load_config()

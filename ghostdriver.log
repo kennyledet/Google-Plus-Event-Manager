@@ -1,0 +1,10 @@
+PhantomJS is launching GhostDriver...
+Ghost Driver running on port 55048
+CustomError: Error in protected function: 'undefined' is not a function (evaluating 'this.F.releaseCapture()')
+
+  https://plus.google.com/_/scs/apps-static/_/js/k=oz.home.en.4FWZSFI3IQc.O/m=b,evt/am=AAAEAOAwgBAMIMQAAgAAIAAAWAEAAQAAAwAQ/rt=h/d=1/rs=AItRSTOpPMJwtJsam3Fstsngxv_MhbPDvg:16 in aa
+  https://plus.google.com/_/scs/apps-static/_/js/k=oz.home.en.4FWZSFI3IQc.O/m=b,evt/am=AAAEAOAwgBAMIMQAAgAAIAAAWAEAAQAAAwAQ/rt=h/d=1/rs=AItRSTOpPMJwtJsam3Fstsngxv_MhbPDvg:125 in c
+TypeError: 'null' is not an object (evaluating 'this.H.setBounds')
+
+  https://plus.google.com/_/scs/apps-static/_/js/k=oz.home.en.4FWZSFI3IQc.O/m=b,evt/am=AAAEAOAwgBAMIMQAAgAAIAAAWAEAAQAAAwAQ/rt=h/d=1/rs=AItRSTOpPMJwtJsam3Fstsngxv_MhbPDvg:5788
+  https://plus.google.com/_/scs/apps-static/_/js/k=oz.home.en.4FWZSFI3IQc.O/m=b,evt/am=AAAEAOAwgBAMIMQAAgAAIAAAWAEAAQAAAwAQ/rt=h/d=1/rs=AItRSTOpPMJwtJsam3Fstsngxv_MhbPDvg:20
