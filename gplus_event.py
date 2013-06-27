@@ -29,6 +29,7 @@ def cli_parse():
     '''Parse command-line arguments'''
     options = {'title': None, 'desc': None, 'date': None,
                'time': None, 'id': None}
+
     parser = argparse.ArgumentParser()
     parser.add_argument("action",  help='''use "create" to create a new event\n
         "update" to update an event\n"details" to get event info''')
@@ -36,6 +37,7 @@ def cli_parse():
     parser.add_argument("--date",  help="event date")
     parser.add_argument("--id",    help="event id")
     parser.add_argument("--description", help="stdin or path to txt file")
+
     args = parser.parse_args()
 
     if args.title:
@@ -145,10 +147,9 @@ class GPlusEventManager(object):
         details['title'] = self.br.find_by_css(title).text.split('\n')[0]
         details['desc'] = self.br.find_by_css(desc).text
 
-        details = {'guests': []}
-        guests = self.br.find_by_css('a[href^="./"]')[2:]
-        for guest in guests:
-            details['guests'].append({guest.text: guest['href']})
+        guest_list = self.br.find_by_css('a[href^="./"]')[2:]
+        details['guests'] = [{guest.text: guest['href']}
+                             for guest in guest_list]
 
         return details
 
