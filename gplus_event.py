@@ -63,7 +63,6 @@ class GPlusEventManager(object):
     def __init__(self, email, passwd):
         self.email = email
         self.passwd = passwd
-        self.u_agent = '''Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:10.0) Gecko/20100101 Firefox/10.0'''
         self.br = Browser('chrome', user_agent=self.u_agent)
 
         # to dynamically load jQuery into the HTML head
