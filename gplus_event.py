@@ -83,8 +83,6 @@ class GPlusEventManager(object):
 
         create_btn = 'div[guidedhelpid="events_create_event_button"]'
         self.br.find_by_css(create_btn)[0].click()
-        sleep(3)
-        #print self.br.url
         return self.complete_form(title, desc, date, time)
 
     def update(self, id, title=None, desc=None, date=None, time=None):
@@ -102,6 +100,7 @@ class GPlusEventManager(object):
     def complete_form(self, title, desc, date, time):
         '''Fill event create/edit form,
            the CSS selectors are valid in both types of form'''
+           sleep(2)
         if title:
             self.br.find_by_css('input[placeholder="Event title"]').fill(title)
         if date:
@@ -137,7 +136,6 @@ class GPlusEventManager(object):
             self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
 
         sleep(5)  # wait for double page load
-        print self.br.url
         return self.br.url  # return event url
 
     def details(self, id):
@@ -170,7 +168,6 @@ class GPlusEventManager(object):
         except Exception, e:
             return False
         else:
-            print 1
             return True
 
 conf = load_config()
