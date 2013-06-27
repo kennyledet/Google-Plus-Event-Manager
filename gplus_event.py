@@ -100,7 +100,7 @@ class GPlusEventManager(object):
     def complete_form(self, title, desc, date, time):
         '''Fill event create/edit form,
            the CSS selectors are valid in both types of form'''
-           sleep(2)
+        sleep(2)
         if title:
             self.br.find_by_css('input[placeholder="Event title"]').fill(title)
         if date:
