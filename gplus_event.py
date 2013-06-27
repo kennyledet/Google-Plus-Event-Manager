@@ -93,6 +93,8 @@ class GPlusEventManager(object):
         return self.complete_form(title, desc, date, time)
 
     def complete_form(self, title, desc, date, time):
+        '''Fill event create/edit form,
+           the CSS selectors are valid in both types of form'''
         if title:
             self.br.find_by_css('input[placeholder="Event title"]').fill(title)
         if date:
@@ -131,7 +133,7 @@ class GPlusEventManager(object):
         return self.br.url  # return event url
 
     def details(self, id):
-        """ Read details of a Google event """
+        """Read details of a Google event"""
         if not self.logged_in:
             return None
 
