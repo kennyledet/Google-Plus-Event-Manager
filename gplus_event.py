@@ -64,7 +64,7 @@ class GPlusEventManager(object):
         self.email = email
         self.passwd = passwd
         self.u_agent = '''Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:10.0) Gecko/20100101 Firefox/10.0'''
-        self.br = Browser('phantomjs', user_agent=self.u_agent)
+        self.br = Browser('chrome', user_agent=self.u_agent)
 
         # to dynamically load jQuery into the HTML head
         self.loadjq = """var head = document.getElementsByTagName('head')[0];
@@ -83,7 +83,8 @@ class GPlusEventManager(object):
 
         create_btn = 'div[guidedhelpid="events_create_event_button"]'
         self.br.find_by_css(create_btn)[0].click()
-        return self.complete_form(title, desc, date, time)
+
+        return self.complete_form(title, desc, date, time, update=False)
 
     def update(self, id, title=None, desc=None, date=None, time=None):
         """ Update a Google Plus event """
@@ -95,9 +96,10 @@ class GPlusEventManager(object):
                     /div[2]/div[2]/div/div/div[2]/div[2]/div/div[1]'''
         self.br.find_by_xpath(dropdown).click()
         self.br.find_by_xpath('//*[@id=":o"]/div').click()
-        return self.complete_form(title, desc, date, time)
 
-    def complete_form(self, title, desc, date, time):
+        return self.complete_form(title, desc, date, time, update=True)
+
+    def complete_form(self, title, desc, date, time, update):
         '''Fill event create/edit form,
            the CSS selectors are valid in both types of form'''
         sleep(2)
@@ -129,13 +131,17 @@ class GPlusEventManager(object):
                          [1].innerHTML = "{}"'''.format(desc)
             self.br.execute_script(set_desc)
 
-        self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
+        invite_btn = self.br.find_by_css('div[guidedhelpid="sharebutton"]')
+        invite_inp = self.br.find_by_css('input[class="i-j-h-G-G"]')
+        
+        invite_btn.click()
+        if not update:  # If new entry, invite Public group by default
+            ''' just works(tm) '''
+            invite_inp.click()
+            invite_inp.type('Public\n')
+            invite_btn.click()
+            sleep(5)  # wait for double page load
 
-        if None not in (title, desc, date, time):  # if new entry
-            self.br.find_by_css('input[class="i-j-h-G-G"]').type('Public\t')
-            self.br.find_by_css('div[guidedhelpid="sharebutton"]').click()
-
-        sleep(5)  # wait for double page load
         return self.br.url  # return event url
 
     def details(self, id):
@@ -145,11 +151,11 @@ class GPlusEventManager(object):
 
         self.br.visit(id)
 
-        title = 'div[class="Iba"]'
-        desc = 'div[class="T7BsYe"]'
+        title = self.br.find_by_css('div[class="Iba"]')
+        desc = self.br.find_by_css('div[class="T7BsYe"]')
 
-        details['title'] = self.br.find_by_css(title).text.split('\n')[0]
-        details['desc'] = self.br.find_by_css(desc).text
+        details['title'] = title.text.split('\n')[0]
+        details['desc'] = desc.text
 
         guest_list = self.br.find_by_css('a[href^="./"]')[2:]
         details['guests'] = [{guest.text: guest['href']}
