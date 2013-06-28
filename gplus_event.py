@@ -35,20 +35,25 @@ def cli_parse():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("action",  help='''use "create" to create a new event\n
-        "update" to update an event\n"details" to get event info''')
+                        "update" to update an event\n"details" to get event info''')
     parser.add_argument("--title", help="event title")
     parser.add_argument("--date",  help="event date")
     parser.add_argument("--id",    help="event id")
-    parser.add_argument("--description", help="stdin or path to txt file")
+    parser.add_argument("--desc",  help="event description")
+    parser.add_argument("--filedesc", help="path to txt file w/ event description", 
+                        type=argparse.FileType('r'))
 
     args = parser.parse_args()
 
     if args.title:
         options['title'] = args.title
 
-    if args.description:
-        with open(args.description, 'r') as description:
-            options['desc'] = description.read()
+    if args.desc:
+        options['desc'] = args.desc
+    elif args.filedesc:
+        options['desc'] = args.filedesc.read()
+    
+    print options['desc']
 
     if args.date:
         options['date'] = dtparser.parse(args.date).strftime('%Y-%m-%d')
@@ -94,9 +99,8 @@ class GPlusEventManager(object):
             return none
 
         self.br.visit(id)
-        dropdown = '''//*[@id="contentPane"]/div/div/div/div[2]/div[2]
-                    /div[2]/div[2]/div/div/div[2]/div[2]/div/div[1]'''
-        self.br.find_by_xpath(dropdown).click()
+        dropdown = 'div[class="A7kfHd q3sPdd"]'
+        self.br.find_by_css(dropdown).click()
         self.br.find_by_xpath('//*[@id=":o"]/div').click()
 
         return self.complete_form(title, desc, date, time, update=True)
