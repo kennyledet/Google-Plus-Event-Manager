@@ -3,3 +3,4 @@ python-dateutil
 pyvirtualdisplay
 PIL
 pyscreenshot
+selenium

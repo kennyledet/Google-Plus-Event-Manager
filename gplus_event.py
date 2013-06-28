@@ -16,6 +16,7 @@ limitations under the License.
 from splinter import Browser
 from time import sleep
 from dateutil import parser as dtparser
+from pyvirtualdisplay import Display
 from pyvirtualdisplay.smartdisplay import SmartDisplay
 import atexit
 import argparse
@@ -65,7 +66,7 @@ class GPlusEventManager(object):
     def __init__(self, email, passwd):
         self.email = email
         self.passwd = passwd
-        self.br = Browser('chrome')
+        self.br = Browser('firefox')
 
         # to dynamically load jQuery into the HTML head
         self.loadjq = """var head = document.getElementsByTagName('head')[0];
@@ -176,18 +177,7 @@ class GPlusEventManager(object):
         else:
             return True
 
-def load_display():
-    try:
-        disp = SmartDisplay(visible=0, bgcolor='black').start()
-        atexit.register(disp.stop)
-        print 1
-    except:
-        print 0
-        if disp:
-            disp.stop()
-        raise
 
-load_display()
 conf = load_config()
 opts = cli_parse()
 gpem = GPlusEventManager(conf['username'], conf['password'])
@@ -206,6 +196,7 @@ elif opts['action'] == 'details':
     details = gpem.details(opts['id'])
 
     print details
+
 
 
 """Testing without CLI args
