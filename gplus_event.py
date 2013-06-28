@@ -16,10 +16,10 @@ limitations under the License.
 from splinter import Browser
 from time import sleep
 from dateutil import parser as dtparser
+from pyvirtualdisplay.smartdisplay import SmartDisplay
+import atexit
 import argparse
 import json
-
-import installers
 
 
 def load_config():
@@ -176,11 +176,21 @@ class GPlusEventManager(object):
         else:
             return True
 
+def load_display():
+    try:
+        disp = SmartDisplay(visible=0, bgcolor='black').start()
+        atexit.register(disp.stop)
+        print 1
+    except:
+        print 0
+        if disp:
+            disp.stop()
+        raise
+
+load_display()
 conf = load_config()
 opts = cli_parse()
 gpem = GPlusEventManager(conf['username'], conf['password'])
-
-#installers.chromedriver()
 
 if opts['action'] == 'create':
     id = gpem.create(opts['title'], opts['desc'],
