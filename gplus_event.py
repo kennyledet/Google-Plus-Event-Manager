@@ -35,12 +35,12 @@ def cli_parse():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("action",  help='''use "create" to create a new event\n
-                        "update" to update an event\n"details" to get event info''')
+                        "update" to update an event\n"details" to get event info''')  # noqa
     parser.add_argument("--title", help="event title")
     parser.add_argument("--date",  help="event date")
     parser.add_argument("--id",    help="event id")
     parser.add_argument("--desc",  help="event description")
-    parser.add_argument("--filedesc", help="path to txt file w/ event description", 
+    parser.add_argument("--filedesc", help="path to txt file w/ event description",  # noqa
                         type=argparse.FileType('r'))
 
     args = parser.parse_args()
@@ -52,8 +52,6 @@ def cli_parse():
         options['desc'] = args.desc
     elif args.filedesc:
         options['desc'] = args.filedesc.read()
-    
-    print options['desc']
 
     if args.date:
         options['date'] = dtparser.parse(args.date).strftime('%Y-%m-%d')
@@ -200,8 +198,6 @@ elif opts['action'] == 'details':
     details = gpem.details(opts['id'])
 
     print details
-
-
 
 """Testing without CLI args
 event = gpem.create('test', 'test', '2013-09-01', '10:45 PM')
