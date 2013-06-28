@@ -19,6 +19,8 @@ from dateutil import parser as dtparser
 import argparse
 import json
 
+import installers
+
 
 def load_config():
     with open('config.json', 'r') as config:
@@ -132,7 +134,7 @@ class GPlusEventManager(object):
 
         invite_btn = self.br.find_by_css('div[guidedhelpid="sharebutton"]')
         invite_inp = self.br.find_by_css('input[class="i-j-h-G-G"]')
-        
+        sleep(5)
         invite_btn.click()
         if not update:  # If new entry, invite Public group by default
             ''' just works(tm) '''
@@ -140,7 +142,6 @@ class GPlusEventManager(object):
             invite_inp.type('Public\n')
             invite_btn.click()
             sleep(5)  # wait for double page load
-
         return self.br.url  # return event url
 
     def details(self, id):
@@ -178,6 +179,8 @@ class GPlusEventManager(object):
 conf = load_config()
 opts = cli_parse()
 gpem = GPlusEventManager(conf['username'], conf['password'])
+
+#installers.chromedriver()
 
 if opts['action'] == 'create':
     id = gpem.create(opts['title'], opts['desc'],
