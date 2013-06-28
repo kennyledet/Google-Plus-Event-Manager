@@ -43,3 +43,6 @@ def chromedriver():
         os.chmod(chromedriver, 0755)
     else:
         chromedriver = "chromedriver"
+
+if raw_input('Install Chromedriver? y or n\t') == 'y':
+    chromedriver()
