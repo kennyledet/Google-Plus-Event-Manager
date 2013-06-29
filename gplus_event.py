@@ -22,7 +22,6 @@ import atexit
 import argparse
 import json
 
-
 def load_config():
     with open('config.json', 'r') as config:
         return json.loads(config.read())
@@ -43,7 +42,11 @@ def cli_parse():
     parser.add_argument("--filedesc", help="path to txt file w/ event description",  # noqa
                         type=argparse.FileType('r'))
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except:
+        parser.print_help()
+        exit(1)
 
     if args.title:
         options['title'] = args.title
@@ -178,7 +181,6 @@ class GPlusEventManager(object):
             return False
         else:
             return True
-
 
 conf = load_config()
 opts = cli_parse()
