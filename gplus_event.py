@@ -87,6 +87,7 @@ class GPlusEventManager(object):
     def create(self, title, desc, date, time):
         """ Create a new Google Plus event """
         if not self.logged_in:
+            self.br.quit()
             return None
 
         create_btn = 'div[guidedhelpid="events_create_event_button"]'
@@ -97,7 +98,8 @@ class GPlusEventManager(object):
     def update(self, id, title=None, desc=None, date=None, time=None):
         """ Update a Google Plus event """
         if not self.logged_in:
-            return none
+            self.br.quit()
+            return None
 
         self.br.visit(id)
         dropdown = 'div[class="A7kfHd q3sPdd"]'
@@ -140,15 +142,18 @@ class GPlusEventManager(object):
 
         invite_btn = self.br.find_by_css('div[guidedhelpid="sharebutton"]')
         invite_inp = self.br.find_by_css('input[class="i-j-h-G-G"]')
-        sleep(5)
+        sleep(3)
         invite_btn.click()
         if not update:  # If new entry, invite Public group by default
             ''' just works(tm) '''
             invite_inp.click()
             invite_inp.type('Public\n')
             invite_btn.click()
-            sleep(5)  # wait for double page load
-        return self.br.url  # return event url
+            sleep(6)  # wait for double page load
+
+        url = self.br.url
+        self.br.quit()
+        return url  # return event url
 
     def details(self, id):
         """Read details of a Google event"""
@@ -178,6 +183,7 @@ class GPlusEventManager(object):
         try:
             self.br.find_by_name('signIn').click()
         except Exception, e:
+            self.br.quit()
             return False
         else:
             return True
