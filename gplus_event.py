@@ -40,6 +40,7 @@ def cli_parse():
     parser.add_argument("--desc",  help="event description")
     parser.add_argument("--filedesc", help="path to txt file w/ event description",  # noqa
                         type=argparse.FileType('r'))
+    parser.add_argument("--otp", help="2-step verification code")
 
     try:
         args = parser.parse_args()
@@ -62,19 +63,21 @@ def cli_parse():
     if args.id:
         options['id'] = args.id
 
+    if args.otp:
+        options['otp'] = args.otp
+
     options['action'] = args.action
 
     return options
 
 
 class GPlusEventManager(object):
-    def __init__(self, email, passwd):
+    def __init__(self, email, passwd, otp):
         self.email = email
         self.passwd = passwd
         self.br = Browser('firefox')
         atexit.register(self.force_br_quit)
-
-        # to dynamically load jQuery into the HTML head
+        # To dynamically load jQuery into the HTML head
         self.loadjq = """var head = document.getElementsByTagName('head')[0];
            var script  = document.createElement('script');
            script.type = 'text/javascript';
@@ -82,6 +85,7 @@ class GPlusEventManager(object):
                 '//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js';
            head.appendChild(script);"""
 
+        self.otp = otp
         self.logged_in = self.login()
 
     def force_br_quit(self):
@@ -195,6 +199,10 @@ class GPlusEventManager(object):
         self.br.fill('Passwd', self.passwd)
         try:
             self.br.find_by_name('signIn').click()
+            sleep(2)
+            if self.otp:
+                self.br.fill('smsUserPin', self.otp)
+                self.br.find_by_id('smsVerifyPin').click()
         except Exception, e:
             self.br.quit()
             return False
@@ -207,7 +215,7 @@ atexit.register(display.stop)
 
 conf = load_config()
 opts = cli_parse()
-gpem = GPlusEventManager(conf['username'], conf['password'])
+gpem = GPlusEventManager(conf['username'], conf['password'], opts.get('otp'))
 
 if opts['action'] == 'create':
     id = gpem.create(opts['title'], opts['desc'],
