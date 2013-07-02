@@ -72,6 +72,7 @@ class GPlusEventManager(object):
         self.email = email
         self.passwd = passwd
         self.br = Browser('firefox')
+        atexit.register(self.force_br_quit)
 
         # to dynamically load jQuery into the HTML head
         self.loadjq = """var head = document.getElementsByTagName('head')[0];
@@ -82,6 +83,12 @@ class GPlusEventManager(object):
            head.appendChild(script);"""
 
         self.logged_in = self.login()
+
+    def force_br_quit(self):
+        try:
+            self.br.quit()
+        except:
+            pass
 
     def create(self, title, desc, date, time):
         """ Create a new Google Plus event """
@@ -197,7 +204,6 @@ class GPlusEventManager(object):
 display = Display(visible=0, size=(800, 600))
 display.start()
 atexit.register(display.stop)
-
 
 conf = load_config()
 opts = cli_parse()
