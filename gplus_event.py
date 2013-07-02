@@ -17,7 +17,6 @@ from splinter import Browser
 from time import sleep
 from dateutil import parser as dtparser
 from pyvirtualdisplay import Display
-from pyvirtualdisplay.smartdisplay import SmartDisplay
 import atexit
 import argparse
 import json
@@ -194,6 +193,11 @@ class GPlusEventManager(object):
             return False
         else:
             return True
+
+display = Display(visible=0, size=(800, 600))
+display.start()
+atexit.register(display.stop)
+
 
 conf = load_config()
 opts = cli_parse()
