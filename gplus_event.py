@@ -16,10 +16,10 @@ limitations under the License.
 from splinter import Browser
 from time import sleep
 from dateutil import parser as dtparser
-from pyvirtualdisplay import Display
 import atexit
 import argparse
 import json
+
 
 def load_config():
     with open('config.json', 'r') as config:
@@ -41,12 +41,25 @@ def cli_parse():
     parser.add_argument("--filedesc", help="path to txt file w/ event description",  # noqa
                         type=argparse.FileType('r'))
     parser.add_argument("--otp", help="2-step verification code")
+    parser.add_argument("--show", help="1 to display the browser, 0 for invisible virtual display",  # noqa
+                        default=0, type=int)
 
     try:
         args = parser.parse_args()
     except:
         parser.print_help()
         exit(1)
+
+    disp = None
+    if not args.show:  # set up invisible virtual display
+        from pyvirtualdisplay.smartdisplay import SmartDisplay
+        try:
+            disp = SmartDisplay(visible=0, bgcolor='black').start()
+            atexit.register(disp.stop)
+        except:
+            if disp:
+                disp.stop()
+            raise
 
     if args.title:
         options['title'] = args.title
@@ -123,8 +136,8 @@ class GPlusEventManager(object):
            the CSS selectors are valid in both types of form'''
         sleep(4)
         if title:
-            title_placeholder = self.br.find_by_css('input[placeholder="Event title"]')
-            if type(title_placeholder) == type([]):
+            title_placeholder = self.br.find_by_css('input[placeholder="Event title"]')  # noqa
+            if isinstance(title_placeholder, list):
                 try:
                     title_placeholder[0].fill(title)
                 except:
@@ -159,10 +172,9 @@ class GPlusEventManager(object):
 
         invite_btn = self.br.find_by_css('div[guidedhelpid="sharebutton"]')
         invite_inp = self.br.find_by_css('input[class="i-j-h-G-G"]')
-        sleep(3)
+
         invite_btn.click()
         if not update:  # If new entry, invite Public group by default
-            ''' just works(tm) '''
             invite_inp.click()
             invite_inp.type('Public\n')
             invite_btn.click()
@@ -208,10 +220,6 @@ class GPlusEventManager(object):
             return False
         else:
             return True
-
-display = Display(visible=0, size=(800, 600))
-display.start()
-atexit.register(display.stop)
 
 conf = load_config()
 opts = cli_parse()

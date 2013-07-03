@@ -1,5 +1,5 @@
-chromedriver.log
 env
-config.json
-ghostdriver.log
 *.pyc
+config.json
+chromedriver.log
+ghostdriver.log
