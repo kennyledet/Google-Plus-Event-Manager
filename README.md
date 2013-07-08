@@ -5,12 +5,11 @@ You can use this script to automate the creation and editing of Google+ Events, 
 Dependencies
 ------------
     * Python 2.6+
-    * splinter module  (for browser automation)
+    * See requirements.txt for Python module requirements
 
 Settings
 --------
-    * Fill out your username and password in config.json
-
+    * Fill out your username and password in config.json.example
 
 Usage
 -----
