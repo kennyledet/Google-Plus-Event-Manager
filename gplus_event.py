@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from splinter import Browser
-from time import sleep
 from dateutil import parser as dtparser
 import atexit
 import argparse
@@ -125,7 +124,10 @@ class GPlusEventManager(object):
             return None
 
         self.br.visit(id)
+
         dropdown = 'div[class="A7kfHd q3sPdd"]'
+        while self.br.is_element_not_present_by_css(dropdown):
+            pass
         self.br.find_by_css(dropdown).click()
         self.br.find_by_xpath('//*[@id=":o"]/div').click()
 
@@ -134,16 +136,13 @@ class GPlusEventManager(object):
     def complete_form(self, title, desc, date, time, update):
         '''Fill event create/edit form,
            the CSS selectors are valid in both types of form'''
-        sleep(4)
+
+        title_input = 'input[placeholder="Event title"]'
+        while self.br.is_element_not_present_by_css(title_input):
+            pass
         if title:
-            title_placeholder = self.br.find_by_css('input[placeholder="Event title"]')  # noqa
-            if isinstance(title_placeholder, list):
-                try:
-                    title_placeholder[0].fill(title)
-                except:
-                    self.br.quit()
-            else:
-                title_placeholder.fill(title)
+            title_placeholder = self.br.find_by_css(title_input)
+            title_placeholder.fill(title)
         if date:
             self.br.find_by_css('input[class="g-A-G T4 lUa"]').click()
             rm_date = '''document.body.getElementsByClassName("g-A-G T4 lUa")
@@ -178,7 +177,8 @@ class GPlusEventManager(object):
             invite_inp.click()
             invite_inp.type('Public\n')
             invite_btn.click()
-            sleep(6)  # wait for double page load
+            while not self.br.is_text_present('Going ('):
+                pass  # wait on page load for new event
 
         url = self.br.url
         self.br.quit()
@@ -211,7 +211,8 @@ class GPlusEventManager(object):
         self.br.fill('Passwd', self.passwd)
         try:
             self.br.find_by_name('signIn').click()
-            sleep(2)
+            while self.br.is_element_present_by_name('signIn'):
+                pass
             if self.otp:
                 self.br.fill('smsUserPin', self.otp)
                 self.br.find_by_id('smsVerifyPin').click()
@@ -221,29 +222,23 @@ class GPlusEventManager(object):
         else:
             return True
 
+
 conf = load_config()
-opts = cli_parse()
-gpem = GPlusEventManager(conf['username'], conf['password'], opts.get('otp'))
 
-if opts['action'] == 'create':
-    id = gpem.create(opts['title'], opts['desc'],
-                     opts['date'], opts['time'])
+if __name__ == '__main__':
+    opts = cli_parse()
+    gpem = GPlusEventManager(conf['username'], conf['password'], opts.get('otp'))
+    if opts['action'] == 'create':
+        id = gpem.create(opts['title'], opts['desc'],
+                         opts['date'], opts['time'])
 
-    print 'Created: {}'.format(id)
-elif opts['action'] == 'update':
-    id = gpem.update(opts['id'], opts['title'], opts['desc'],
-                     opts['date'], opts['time'])
+        print 'Created: {}'.format(id)
+    elif opts['action'] == 'update':
+        id = gpem.update(opts['id'], opts['title'], opts['desc'],
+                         opts['date'], opts['time'])
 
-    print 'Event {} updated'.format(opts['id'])
-elif opts['action'] == 'details':
-    details = gpem.details(opts['id'])
+        print 'Event {} updated'.format(opts['id'])
+    elif opts['action'] == 'details':
+        details = gpem.details(opts['id'])
 
-    print details
-
-"""Testing without CLI args
-event = gpem.create('test', 'test', '2013-09-01', '10:45 PM')
-print event
-gpem.update(event, title='New title')
-sleep(2)
-gpem.details(event)
-"""
+        print details
