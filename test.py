@@ -9,13 +9,12 @@ gpem = GPlusEventManager(conf['username'], conf['password'], None)
 # Create a new event passing in basic information
 event = gpem.create(title='Test', desc='Test description', date='2013-09-01', time='10:45 PM')  # noqa
 print 'Created event: {}'.format(event)
-print 'Now we\'re going to edit it..just a sec'
-time.sleep(5)
 
 # Update an event by passing the url and any newly desired information
-print event
+gpem = GPlusEventManager(conf['username'], conf['password'], None)
 gpem.update(event, title='New title')
-time.sleep(2)
+
 
 # Print the details and guests of an event
+gpem = GPlusEventManager(conf['username'], conf['password'], None)
 gpem.details(event)

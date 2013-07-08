@@ -109,8 +109,7 @@ class GPlusEventManager(object):
     def create(self, title, desc, date, time):
         """ Create a new Google Plus event """
         if not self.logged_in:
-            self.br.quit()
-            return None
+            self.logged_in = self.login()
 
         create_btn = 'div[guidedhelpid="events_create_event_button"]'
         self.br.find_by_css(create_btn)[0].click()
@@ -120,8 +119,7 @@ class GPlusEventManager(object):
     def update(self, id, title=None, desc=None, date=None, time=None):
         """ Update a Google Plus event """
         if not self.logged_in:
-            self.br.quit()
-            return None
+            self.logged_in = self.login()
 
         self.br.visit(id)
 
@@ -187,10 +185,10 @@ class GPlusEventManager(object):
     def details(self, id):
         """Read details of a Google event"""
         if not self.logged_in:
-            return None
+            self.logged_in = self.login()
 
         self.br.visit(id)
-
+        details = []
         title = self.br.find_by_css('div[class="Iba"]')
         desc = self.br.find_by_css('div[class="T7BsYe"]')
 
@@ -216,9 +214,10 @@ class GPlusEventManager(object):
             if self.otp:
                 self.br.fill('smsUserPin', self.otp)
                 self.br.find_by_id('smsVerifyPin').click()
+
         except Exception, e:
-            self.br.quit()
-            return False
+            print 'Could not login'
+            exit(1)
         else:
             return True
 
