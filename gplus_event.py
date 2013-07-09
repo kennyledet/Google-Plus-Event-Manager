@@ -132,8 +132,8 @@ class GPlusEventManager(object):
         return self.complete_form(title, desc, date, time, update=True)
 
     def complete_form(self, title, desc, date, time, update):
-        '''Fill event create/edit form,
-           the CSS selectors are valid in both types of form'''
+        """Fill event create/edit form,
+           the CSS selectors are valid in both types of form"""
 
         title_input = 'input[placeholder="Event title"]'
         while self.br.is_element_not_present_by_css(title_input):
@@ -214,7 +214,11 @@ class GPlusEventManager(object):
             if self.otp:
                 self.br.fill('smsUserPin', self.otp)
                 self.br.find_by_id('smsVerifyPin').click()
-
+                while self.br.is_element_present_by_id('smsVerifyPin'):
+                    pass
+                if self.br.is_element_present_by_id('smsauth-time-sync-tip'):
+                    print 'Expired OTP'
+                    exit(1)
         except Exception, e:
             print 'Could not login'
             exit(1)
@@ -226,7 +230,8 @@ conf = load_config()
 
 if __name__ == '__main__':
     opts = cli_parse()
-    gpem = GPlusEventManager(conf['username'], conf['password'], opts.get('otp'))
+    gpem = GPlusEventManager(conf['username'], conf['password'],
+                             opts.get('otp'))
     if opts['action'] == 'create':
         id = gpem.create(opts['title'], opts['desc'],
                          opts['date'], opts['time'])
