@@ -217,7 +217,7 @@ class GPlusEventManager(object):
                 while self.br.is_element_present_by_id('smsVerifyPin'):
                     pass
                 if self.br.is_element_present_by_id('smsauth-time-sync-tip'):
-                    print 'Expired OTP'
+                    print 'Expired OTP {}'.format(self.otp)
                     exit(1)
         except Exception, e:
             print 'Could not login'
