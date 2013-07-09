@@ -188,7 +188,7 @@ class GPlusEventManager(object):
             self.logged_in = self.login()
 
         self.br.visit(id)
-        details = []
+        details = {}
         title = self.br.find_by_css('div[class="Iba"]')
         desc = self.br.find_by_css('div[class="T7BsYe"]')
 
